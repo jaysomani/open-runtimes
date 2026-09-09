@@ -6,6 +6,6 @@ class App extends StatelessComponent {
 
   @override
   Component build(BuildContext context) {
-    return text('hello_jaspr');
+    return h1([text('Hello Open Runtimes')]);
   }
 }
