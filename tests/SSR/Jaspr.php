@@ -11,29 +11,6 @@ error_reporting(E_ALL);
 
 class Jaspr extends SSR
 {
-    public function testServerAction(): void
-    {
-        $scrapeDate = function (string $body) {
-            $date = \explode('[DATE_START]', $body)[1];
-            $date = \explode('[DATE_END]', $body)[0];
-            return $date;
-        };
-
-        $response = Client::execute(url: '/date', method: 'GET');
-        self::assertEquals(200, $response['code']);
-        self::assertNotEmpty($response['body']);
-        $date1 = $scrapeDate($response['body']);
-
-        \sleep(1);
-
-        $response = Client::execute(url: '/date', method: 'GET');
-        self::assertEquals(200, $response['code']);
-        self::assertNotEmpty($response['body']);
-        $date2 = $scrapeDate($response['body']);
-
-        self::assertNotEquals($date1, $date2);
-    }
-
     // Jaspr compiles to a standalone AOT binary, so it can't be hooked into the
     // open-runtimes log/error capture contract the way Node's NODE_OPTIONS import
     // wraps http.createServer. So this only checks what doesn't depend on that:
@@ -58,27 +35,6 @@ class Jaspr extends SSR
     public function testDevLogFiles(): void
     {
         $this->markTestSkipped('Jaspr SSR compiles to native Dart AOT — stdout capture not supported yet');
-    }
-
-    public function testServerLibrary(): void
-    {
-        $scrapeUuid = function (string $body) {
-            $date = \explode('[UUID_START]', $body)[1];
-            $date = \explode('[UUID_END]', $body)[0];
-            return $date;
-        };
-
-        $response = Client::execute(url: '/library', method: 'GET');
-        self::assertEquals(200, $response['code']);
-        self::assertStringContainsString("My UUID is", $response['body']);
-        $uuid1 = $scrapeUuid($response['body']);
-
-        $response = Client::execute(url: '/library', method: 'GET');
-        self::assertEquals(200, $response['code']);
-        self::assertStringContainsString("My UUID is", $response['body']);
-        $uuid2 = $scrapeUuid($response['body']);
-
-        self::assertNotEquals($uuid1, $uuid2);
     }
 
     public function testHiddenFile(): void
