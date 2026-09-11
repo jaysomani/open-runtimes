@@ -16,6 +16,8 @@ $server = new Swoole\HTTP\Server("0.0.0.0", 3000);
 $server->set([
     'package_max_length' => $payloadSize,
     'buffer_output_size' => $payloadSize,
+    'reload_async' => true,
+    'max_wait_time' => 30,
 ]);
 
 const USER_CODE_PATH = '/usr/local/server/src/function';
@@ -275,7 +277,7 @@ $server->on("Request", function ($req, $res) use ($action, $config, &$activeRequ
         return;
     }
 
-    $logger = new Logger($req->header['x-open-runtimes-logging'] ?? '', $req->header['x-open-runtimes-log-id'] ?? '', $config->env);
+    $logger = new Logger($req->header['x-open-runtimes-logging'] ?? '', $req->header['x-open-runtimes-log-id'] ?? '', $config->env, $config->logsDirectory);
     $requestId = \spl_object_id($res);
     $activeRequests[$requestId] = [
         'logger' => $logger,

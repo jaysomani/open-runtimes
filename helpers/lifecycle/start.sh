@@ -30,10 +30,14 @@ opr_success "Runtime started."
 start_uptime=$(opr_uptime)
 export start_uptime
 
-# Run server and monitor stdout for ready message
+# Tini forwards signals to the whole process group. Keep the shell and log
+# reader alive until the server finishes; the container manager owns the deadline.
+# Bash defers this trap during the pipeline, but exits if signaled before launch.
+trap 'exit "${PIPESTATUS[0]}"' TERM INT
 bash -c "$1" 2>&1 | {
+	trap '' TERM INT
 	recorded=false
-	while IFS= read -r line; do
+	while IFS= read -r line || [ -n "$line" ]; do
 		printf '%s\n' "$line"
 		if [ "$recorded" = false ] && [[ "$line" == *"HTTP server successfully started"* || "$line" == *"server started on http://"* ]]; then
 			end_uptime=$(awk '{print $1}' /proc/uptime)
@@ -43,3 +47,5 @@ bash -c "$1" 2>&1 | {
 		fi
 	done
 }
+
+exit "${PIPESTATUS[0]}"
